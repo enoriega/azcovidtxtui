@@ -12,7 +12,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 // you will also need the css that comes with bootstrap-daterangepicker
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import {useState} from "react";
-import {useLocalStore} from "mobx-react-lite";
 
 function Topics({names}){
     let topics = names.map((i, ix) => <li key={ix}>{i}</li>)
@@ -58,12 +57,14 @@ function computeTopics(items){
     return topics
 }
 
+function Rows({items}) {
+    return items.map( (item, ix) => <ItemRow item={item} key={ix} /> )
+}
+
 function List({items}) {
 
     let [dateRange, setDateRange] = useState([]);
-    const state = useLocalStore(() => ({
-        items: computeTopics(items)
-    }));
+    let [categories, setCategories] = useState(computeTopics(items));
 
     var fixedItems = items.map(fixItem)
     fixedItems.sort((a, b) => (a.date > b.date) ? -1: 1)
@@ -77,20 +78,16 @@ function List({items}) {
        })
     }
 
+    // Filter per category
+    fixedItems = fixedItems.filter(i => {
+        let allowed = new Set(categories.filter(c => c.checked).map(c => c.id))
+        return i.topics.some(t => allowed.has(t))
 
-    let rows = fixedItems.map( (item, ix) => <ItemRow item={item} key={ix} /> )
+    })
 
-    // let topics = computeTopics(fixedItems);
-    // var topics = [...new Set(fixedItems.map( i => i.topics.map(t => t.toLowerCase())
-    // ).flat())]
-    //
-    // topics = topics.map(
-    //     t => ({
-    //         id: t,
-    //         label: t,
-    //         checked: true
-    //     })
-    // )
+
+    let rows = <Rows items={fixedItems} />
+
 
     function handleEvent(event, picker) {
         if(event.type === "apply") {
@@ -104,7 +101,7 @@ function List({items}) {
             <Row className="header">
                 <Col>Title</Col>
                 <Col>Contents</Col>
-                <Col><CheckboxDropdown items={state.items} /></Col>
+                <Col><CheckboxDropdown items={categories} onChange={setCategories} /></Col>
                 <Col>
                     <DateRangePicker onEvent={handleEvent}>
                         <Button>Set Date Range</Button>

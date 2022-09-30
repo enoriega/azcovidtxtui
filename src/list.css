@@ -2,6 +2,10 @@
     background-color: #eceff1
 }
 
+.container-fluid {
+    border-radius: 10px;
+}
+
 .container-fluid .row:nth-child(even){
     background-color: #cfD8dc
 }

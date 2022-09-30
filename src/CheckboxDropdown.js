@@ -5,7 +5,7 @@ import "./styles.css";
 
 import { Button, ButtonGroup, Dropdown, Form } from "react-bootstrap";
 
-const CheckboxMenu = React.forwardRef(
+const CheckboxMenu =
     (
         {
             children,
@@ -14,12 +14,10 @@ const CheckboxMenu = React.forwardRef(
             "aria-labelledby": labeledBy,
             onSelectAll,
             onSelectNone
-        },
-        ref
+        }
     ) => {
         return (
             <div
-                ref={ref}
                 style={style}
                 className={`${className} CheckboxMenu`}
                 aria-labelledby={labeledBy}
@@ -47,13 +45,11 @@ const CheckboxMenu = React.forwardRef(
                 </div>
             </div>
         );
-    }
-);
+    };
 
-const CheckDropdownItem = React.forwardRef(
-    ({ children, id, checked, onChange }, ref) => {
+const CheckDropdownItem = ({ children, id, checked, onChange }) => {
         return (
-            <Form.Group ref={ref} className="dropdown-item mb-0" controlId={id}>
+            <Form.Group className="dropdown-item mb-0" controlId={id}>
                 <Form.Check
                     type="checkbox"
                     label={children}
@@ -62,26 +58,28 @@ const CheckDropdownItem = React.forwardRef(
                 />
             </Form.Group>
         );
-    }
-);
+    };
 
-export const CheckboxDropdown = observer(({ items }) => {
+export const CheckboxDropdown = ({ items, onChange }) => {
     const handleChecked = (key, event) => {
         items.find(i => i.id === key).checked = event.target.checked;
+        onChange([...items]);
     };
 
     const handleSelectAll = () => {
         items.forEach(i => (i.checked = true));
+        onChange([...items]);
     };
 
     const handleSelectNone = () => {
         items.forEach(i => (i.checked = false));
+        onChange([...items]);
     };
 
     return (
         <Dropdown>
             <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                Properties
+                Categories
             </Dropdown.Toggle>
 
             <Dropdown.Menu
@@ -103,4 +101,4 @@ export const CheckboxDropdown = observer(({ items }) => {
             </Dropdown.Menu>
         </Dropdown>
     );
-});
+}
