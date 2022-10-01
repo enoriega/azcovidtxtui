@@ -12,6 +12,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 // you will also need the css that comes with bootstrap-daterangepicker
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import {useState} from "react";
+import {Link} from "react-router-dom";
 
 function Topics({names}){
     let topics = names.map((i, ix) => <li key={ix}>{i}</li>)
@@ -28,8 +29,9 @@ function ItemRow({item}){
             <Col className="newsTitle">{item.title}</Col>
             <Col>{item.text.substring(0, 200)}...</Col>
             <Col><Topics names={item.topics} /></Col>
-            <Col className="date">{new Date(item.date).toDateString()}</Col>
-            <Col className="action"><Button>Details</Button></Col>
+            {/*<Col className="date">{new Date(item.date).toDateString()}</Col>*/}
+            <Col className="date">{item.date.toDateString()}</Col>
+            <Col className="action"><Link to={"item"} state={{item:item}}><Button>Details</Button></Link></Col>
         </Row>
     )
 }
@@ -38,7 +40,7 @@ function fixItem(item){
     return {
         ...item,
         topics: item.topics.map(i => i.toLowerCase()),
-        date: Date.parse(item.date)
+        date: new Date(Date.parse(item.date))
     }
 }
 

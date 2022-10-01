@@ -1,13 +1,10 @@
 import './App.css';
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import data from './test_data.json'
 import List from "./List";
+import Item from "./Item";
 
 
-
-function Item() {
-  return "Mundo";
-}
 
 function App() {
   return (

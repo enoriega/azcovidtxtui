@@ -1,0 +1,32 @@
+.element{
+    text-align: left;
+}
+
+.content-field{
+    padding: 1em;
+    padding-top: 0;
+}
+
+.field-name{
+    font-weight: bold;
+    /*padding-right: 1em;*/
+}
+
+
+.field-name:after{
+    content: ": ";
+}
+
+.content{
+    padding: 1em;
+}
+
+.contents{
+    border-style: solid;
+    border-width: 1px;
+    margin: 1em;
+    padding: .5em;
+    border-radius: 10px;
+}
+
+
