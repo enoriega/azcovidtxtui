@@ -13,6 +13,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import {useState} from "react";
 import {Link} from "react-router-dom";
+import FormCheckInput from "react-bootstrap/FormCheckInput";
 
 function Topics({names}){
     let topics = names.map((i, ix) => <li key={ix}>{i}</li>)
@@ -23,7 +24,7 @@ function Topics({names}){
     )
 }
 
-function ItemRow({item}){
+function ItemRow({item, onChecked, itemIx}){
     return (
         <Row>
             <Col className="newsTitle">{item.title}</Col>
@@ -32,6 +33,13 @@ function ItemRow({item}){
             {/*<Col className="date">{new Date(item.date).toDateString()}</Col>*/}
             <Col className="date">{item.date.toDateString()}</Col>
             <Col className="action"><Link to={"item"} state={{item:item}}><Button>Details</Button></Link></Col>
+            <Col><FormCheckInput style={{textAlign: "center"}} checked={item.checked} onChange={() => {}} onClick={(e) => {
+                if(onChecked) {
+                    e.item = item;
+                    e.itemIx = itemIx;
+                    onChecked(e)
+                }
+            }} /></Col>
         </Row>
     )
 }
@@ -39,8 +47,10 @@ function ItemRow({item}){
 function fixItem(item){
     return {
         ...item,
+        text: item.text.replace(/\n/g, " "),
         topics: item.topics.map(i => i.toLowerCase()),
-        date: new Date(Date.parse(item.date))
+        date: new Date(Date.parse(item.date)),
+        selected: true
     }
 }
 
@@ -59,16 +69,18 @@ function computeTopics(items){
     return topics
 }
 
-function Rows({items}) {
-    return items.map( (item, ix) => <ItemRow item={item} key={ix} /> )
+function Rows({items, onChecked}) {
+    return items.map( (item, ix) => <ItemRow item={item} key={ix} itemIx={ix} onChecked={onChecked} /> )
 }
 
 function List({items}) {
 
     let [dateRange, setDateRange] = useState([]);
     let [categories, setCategories] = useState(computeTopics(items));
+    // let [selectedItems, setSelectedItems] = useState(new Array(items.length).fill(true));
+    let [fixedItems, setFixedItems] = useState(items.map(fixItem));
 
-    var fixedItems = items.map(fixItem)
+    // var fixedItems = items.map(fixItem)
     fixedItems.sort((a, b) => (a.date > b.date) ? -1: 1)
 
 
@@ -88,12 +100,52 @@ function List({items}) {
     })
 
 
-    let rows = <Rows items={fixedItems} />
+    let rows = <Rows items={fixedItems} onChecked={
+        e => {
+            fixedItems[e.itemIx].checked = !fixedItems[e.itemIx].checked;
+            setFixedItems([...fixedItems]);
+        }
+    } />
 
 
     function handleEvent(event, picker) {
         if(event.type === "apply") {
             setDateRange([picker.startDate, picker.endDate]);
+        }
+    }
+
+    function itemToRow(i){
+        let fields = new Array()
+        for(const property in i) {
+            fields.push(i[property])
+        }
+        return fields.join("\t");
+    }
+
+    function downloadSelectedItems(){
+        let chosenItems = fixedItems.filter(i => i.checked)
+
+        if(chosenItems.length > 0) {
+            let header = [Object.keys(chosenItems[0]).join("\t")];
+            let lines = chosenItems.map(itemToRow);
+            // lines.reverse()
+            let contents = (header.concat(lines)).join("\n");
+            save("exported_data.tsv", contents);
+        }
+    }
+
+    function save(filename, data) {
+        const blob = new Blob([data], {type: 'text/tsv'});
+        if(window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveBlob(blob, filename);
+        }
+        else{
+            const elem = window.document.createElement('a');
+            elem.href = window.URL.createObjectURL(blob);
+            elem.download = filename;
+            document.body.appendChild(elem);
+            elem.click();
+            document.body.removeChild(elem);
         }
     }
 
@@ -110,6 +162,7 @@ function List({items}) {
                     </DateRangePicker>
                 </Col>
                 <Col></Col>
+                <Col><Button onClick={downloadSelectedItems}>Download Selected</Button></Col>
             </Row>
             {rows}
         </Container>
