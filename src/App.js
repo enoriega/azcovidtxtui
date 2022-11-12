@@ -1,6 +1,6 @@
 import './App.css';
 import { Routes, Route } from "react-router-dom";
-import data from './test_data.json'
+import data from './out.json'
 import List from "./List";
 import Item from "./Item";
 

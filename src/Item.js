@@ -2,7 +2,8 @@ import "./Item.css"
 import {useLocation} from "react-router-dom";
 
 function Field({name, content, isLink}){
-    let inner = (!isLink)?content:<a href={content}>{content}</a>;
+    let nicerContent = content.split('\n').map(line => <>{line}<br /></>);
+    let inner = (!isLink)?nicerContent:<a href={content}>{nicerContent}</a>;
     return <div className="content-field"><span className="field-name">{name}</span>{inner}</div>
 }
 
