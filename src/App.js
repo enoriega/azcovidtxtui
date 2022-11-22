@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import data from './out.json'
 import List from "./List";
 import Item from "./Item";
+import Manual from "./Manual";
 
 
 
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<List items={data} />} />
           <Route path="item" element={<Item />} />
+          <Route path="manual" element={<Manual />} />
         </Routes>
       </div>
   );
