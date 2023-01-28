@@ -20,6 +20,10 @@
     padding: 1em;
 }
 
+.previouslySeen{
+    background-color: cornsilk;
+}
+
 .header{
     text-align: center;
     font-weight: bolder;

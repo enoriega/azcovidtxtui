@@ -31,16 +31,21 @@ function Topics({names}){
  */
 function ItemRow({item, onSelected, onSetPreviouslySeen, itemIx}){
 
+    let style = {}
+    if(item.previouslySeen)
+        style.backgroundColor = 'cornsilk';
+
     return (
-        <Row>
-            <Col className="newsTitle">{item.title}</Col>
+        <Row style={style}>
+            <Col className="newsTitle"><a href={item.uri} target="_blank">{item.title}</a></Col>
             <Col>{item.text.substring(0, 200)}...</Col>
             <Col><Topics names={item.topics} /></Col>
             {/*<Col className="date">{new Date(item.date).toDateString()}</Col>*/}
             <Col className="date">{item.date.toDateString()}</Col>
             <Col className="action"><Link to={"item"} state={{item:item}}><Button>Details</Button></Link></Col>
+            
             {/* Viewed state */}
-            <Col><FormCheckInput style={{textAlign: "center"}} onChange={() => {}}
+            <Col style={{textAlign:"center"}}><FormCheckInput style={{textAlign: "center"}} onChange={() => {}}
               checked={item.previouslySeen}
               onClick={(e) => {
                 if(onSetPreviouslySeen){
@@ -53,13 +58,14 @@ function ItemRow({item, onSelected, onSetPreviouslySeen, itemIx}){
                 />
             </Col>
             {/* Checked status */}
-            <Col><FormCheckInput style={{textAlign: "center"}} checked={item.checked} onChange={() => {}} onClick={(e) => {
+            <Col style={{textAlign:"center"}}><FormCheckInput style={{textAlign: "center"}} checked={item.checked} onChange={() => {}} onClick={(e) => {
                 if(onSelected) {
                     e.item = item;
                     e.itemIx = itemIx;
                     onSelected(e)
                 }
             }} /></Col>
+            <Col />
         </Row>
     )
 }
