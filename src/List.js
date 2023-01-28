@@ -24,6 +24,11 @@ function Topics({names}){
     )
 }
 
+/**
+ * Represents a row of the grid
+ * @param {*} param0 
+ * @returns 
+ */
 function ItemRow({item, onChecked, itemIx}){
     return (
         <Row>
@@ -44,16 +49,24 @@ function ItemRow({item, onChecked, itemIx}){
     )
 }
 
-function fixItem(item){
+/**
+ * Pre-process an item in order to add the properties necessary to work in th interface
+ */
+function preProcessItem(item){
     return {
         ...item,
         text: item.text.replace(/\n/g, " "),
         topics: item.topics.map(i => i.toLowerCase()),
         date: new Date(Date.parse(item.date)),
-        selected: true
+        checked: false
     }
 }
 
+/**
+ * Generates the topics out of the elements read from the data file
+ * @param {items} items 
+ * @returns 
+ */
 function computeTopics(items){
     var topics = [...new Set(items.map( i => i.topics.map(t => t.toLowerCase())
     ).flat())]
@@ -69,6 +82,11 @@ function computeTopics(items){
     return topics
 }
 
+/**
+ * Component that represents a rows of the grid
+ * @param {*} param0 
+ * @returns 
+ */
 function Rows({items, onChecked}) {
     return items.map( (item, ix) => <ItemRow item={item} key={ix} itemIx={ix} onChecked={onChecked} /> )
 }
@@ -77,8 +95,7 @@ function List({items}) {
 
     let [dateRange, setDateRange] = useState([]);
     let [categories, setCategories] = useState(computeTopics(items));
-    // let [selectedItems, setSelectedItems] = useState(new Array(items.length).fill(true));
-    let [fixedItems, setFixedItems] = useState(items.map(fixItem));
+    let [fixedItems, setFixedItems] = useState(items.map(preProcessItem));
 
     // var fixedItems = items.map(fixItem)
     fixedItems.sort((a, b) => (a.date > b.date) ? -1: 1)
