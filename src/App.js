@@ -10,7 +10,7 @@ import Manual from "./Manual";
 function App() {
   return (
       <div className="App">
-        <h1>AZCovidTxt News Monitoring</h1>
+        <h1>AZHealthTxt News Monitoring</h1>
         <Routes>
           <Route path="/" element={<List items={data} />} />
           <Route path="item" element={<Item />} />
