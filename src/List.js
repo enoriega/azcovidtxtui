@@ -29,22 +29,43 @@ function Topics({names}){
  * @param {*} param0 
  * @returns 
  */
-function ItemRow({item, onChecked, itemIx}){
+function ItemRow({item, onSelected, onSetPreviouslySeen, itemIx}){
+
+    let style = {}
+    if(item.previouslySeen)
+        style.backgroundColor = 'cornsilk';
+
     return (
-        <Row>
-            <Col className="newsTitle">{item.title}</Col>
+        <Row style={style}>
+            <Col className="newsTitle"><a href={item.uri} target="_blank">{item.title}</a></Col>
             <Col>{item.text.substring(0, 200)}...</Col>
             <Col><Topics names={item.topics} /></Col>
             {/*<Col className="date">{new Date(item.date).toDateString()}</Col>*/}
             <Col className="date">{item.date.toDateString()}</Col>
             <Col className="action"><Link to={"item"} state={{item:item}}><Button>Details</Button></Link></Col>
-            <Col><FormCheckInput style={{textAlign: "center"}} checked={item.checked} onChange={() => {}} onClick={(e) => {
-                if(onChecked) {
+            
+            {/* Viewed state */}
+            <Col style={{textAlign:"center"}}><FormCheckInput style={{textAlign: "center"}} onChange={() => {}}
+              checked={item.previouslySeen}
+              onClick={(e) => {
+                if(onSetPreviouslySeen){
                     e.item = item;
                     e.itemIx = itemIx;
-                    onChecked(e)
+                    onSetPreviouslySeen(e)
+                }  
+              }}
+                 
+                />
+            </Col>
+            {/* Checked status */}
+            <Col style={{textAlign:"center"}}><FormCheckInput style={{textAlign: "center"}} checked={item.checked} onChange={() => {}} onClick={(e) => {
+                if(onSelected) {
+                    e.item = item;
+                    e.itemIx = itemIx;
+                    onSelected(e)
                 }
             }} /></Col>
+            <Col />
         </Row>
     )
 }
@@ -52,13 +73,15 @@ function ItemRow({item, onChecked, itemIx}){
 /**
  * Pre-process an item in order to add the properties necessary to work in th interface
  */
-function preProcessItem(item){
+function preProcessItem(item, previouslySeenStates){
+    let previouslySeen = previouslySeenStates[item.uri] || false;
     return {
         ...item,
         text: item.text.replace(/\n/g, " "),
         topics: item.topics.map(i => i.toLowerCase()),
         date: new Date(Date.parse(item.date)),
-        checked: false
+        checked: false,
+        previouslySeen: previouslySeen
     }
 }
 
@@ -87,15 +110,17 @@ function computeTopics(items){
  * @param {*} param0 
  * @returns 
  */
-function Rows({items, onChecked}) {
-    return items.map( (item, ix) => <ItemRow item={item} key={ix} itemIx={ix} onChecked={onChecked} /> )
+function Rows({items, onSetPreviouslySeen, onChecked}) {
+    return items.map( (item, ix) => <ItemRow item={item} key={ix} itemIx={ix} onSelected={onChecked} onSetPreviouslySeen={onSetPreviouslySeen} /> )
 }
 
 function List({items}) {
-
+    let prevSeenKey = "prevSeenItems";
     let [dateRange, setDateRange] = useState([]);
     let [categories, setCategories] = useState(computeTopics(items));
-    let [fixedItems, setFixedItems] = useState(items.map(preProcessItem));
+    let [previouslySeenItems, setPreviouslySeenItems] = useState(localStorage.getItem(prevSeenKey)?JSON.parse(localStorage.getItem(prevSeenKey)):{});
+    let [fixedItems, setFixedItems] = useState(items.map(i => preProcessItem(i, previouslySeenItems)));
+    
 
     // var fixedItems = items.map(fixItem)
     fixedItems.sort((a, b) => (a.date > b.date) ? -1: 1)
@@ -116,13 +141,29 @@ function List({items}) {
 
     })
 
+    // Set the previously seen flags
 
-    let rows = <Rows items={fixedItems} onChecked={
-        e => {
-            fixedItems[e.itemIx].checked = !fixedItems[e.itemIx].checked;
-            setFixedItems([...fixedItems]);
-        }
-    } />
+
+    let rows = <Rows items={fixedItems} 
+                    onChecked={
+                        e => {
+                            fixedItems[e.itemIx].checked = !fixedItems[e.itemIx].checked;
+                            setFixedItems([...fixedItems]);
+                        }
+                    }
+                    
+                    onSetPreviouslySeen={
+                        e => {
+                            let item = fixedItems[e.itemIx]
+                            previouslySeenItems[item.uri] = (item.uri in previouslySeenItems)?!previouslySeenItems[item.uri]:true;
+                            item.previouslySeen = previouslySeenItems[item.uri]
+                            let x = {...previouslySeenItems}
+                            localStorage.setItem(prevSeenKey, JSON.stringify(x))
+                            setPreviouslySeenItems(x);
+                            setFixedItems([...fixedItems])
+                        }
+                    }
+                />
 
 
     function handleEvent(event, picker) {
@@ -178,7 +219,9 @@ function List({items}) {
                         <Button>Set Date Range</Button>
                     </DateRangePicker>
                 </Col>
-                <Col></Col>
+                <Col />
+                <Col>Previously Seen</Col>
+                <Col>Select</Col>
                 <Col><Button onClick={downloadSelectedItems}>Download Selected</Button></Col>
             </Row>
             {rows}
